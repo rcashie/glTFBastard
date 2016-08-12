@@ -23,6 +23,5 @@ if (!doc) {
 ````
 
 ## Features still to be implemented.
-* Animation parsing.
 * Asset parsing.
-* Technique states.
+* Technique state parsing.
