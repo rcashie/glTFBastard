@@ -1,16 +1,16 @@
 /*
 Copyright (c) 2016 Ruben Cashie
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
-modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
 is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
@@ -54,7 +54,7 @@ namespace glTFBastard {
 				return false;
 			}
 
-			outArray->push_back(result);
+			outArray->push_back(std::move(result));
 		}
 
 		return true;
@@ -86,10 +86,8 @@ namespace glTFBastard {
 				return false;
 			}
 
-			outMap->insert({
-				childName,
-				result
-			});
+			outMap->insert(
+				std::pair<std::string, T>(childName, std::move(result)));
 		}
 
 		return true;
@@ -135,8 +133,13 @@ namespace glTFBastard {
 		T* out,
 		std::string& outErr) {
 
+		// Just return true if it does exist.
+		if (jsonElement.type == json_none) {
+			return true;
+		}
+
 		K elementValue;
-		if (!ParseOptionalElement(jsonElement, elementName, &elementValue, outErr)) {
+		if (!ParseElement(jsonElement, elementName, &elementValue, outErr)) {
 			return false;
 		}
 
@@ -276,10 +279,10 @@ namespace glTFBastard {
 	}
 
 	// Parses a Camera element.
-	template<> bool ParseElement<std::shared_ptr<Camera>>(
+	template<> bool ParseElement<std::unique_ptr<Camera>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Camera>* out,
+		std::unique_ptr<Camera>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<std::string, Camera::Type> typeMap = {
@@ -287,7 +290,7 @@ namespace glTFBastard {
 			{ "perspective", Camera::TYPE_PERSPECTIVE }
 		};
 
-		std::shared_ptr<Camera> result(new Camera());
+		std::unique_ptr<Camera> result(new Camera());
 		if (!ParseAndMapRequiredElement(jsonElement["type"], elementName + ".type", typeMap, &result->type, outErr)) {
 			return false;
 		}
@@ -331,15 +334,15 @@ namespace glTFBastard {
 			}
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Buffer element.
-	template<> bool ParseElement<std::shared_ptr<Buffer>>(
+	template<> bool ParseElement<std::unique_ptr<Buffer>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Buffer>* out,
+		std::unique_ptr<Buffer>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<std::string, Buffer::Type> typeMap = {
@@ -347,7 +350,7 @@ namespace glTFBastard {
 			{ "text", Buffer::TYPE_TEXT }
 		};
 
-		std::shared_ptr<Buffer> result(new Buffer());
+		std::unique_ptr<Buffer> result(new Buffer());
 		if (!ParseRequiredElement(jsonElement["uri"], elementName + ".uri", &result->uri, outErr)) {
 			return false;
 		}
@@ -360,15 +363,15 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a BufferView element.
-	template<> bool ParseElement<std::shared_ptr<BufferView>>(
+	template<> bool ParseElement<std::unique_ptr<BufferView>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<BufferView>* out,
+		std::unique_ptr<BufferView>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, BufferView::Target> targetMap = {
@@ -376,7 +379,7 @@ namespace glTFBastard {
 			{ 34963, BufferView::TARGET_ELEMENT_ARRAY_BUFFER }
 		};
 
-		std::shared_ptr<BufferView> result(new BufferView());
+		std::unique_ptr<BufferView> result(new BufferView());
 		if (!ParseRequiredElement(jsonElement["buffer"], elementName + ".buffer", &result->buffer, outErr)) {
 			return false;
 		}
@@ -394,15 +397,15 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses an Accessor element.
-	template<> bool ParseElement<std::shared_ptr<Accessor>>(
+	template<> bool ParseElement<std::unique_ptr<Accessor>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Accessor>* out,
+		std::unique_ptr<Accessor>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<std::string, Accessor::Type> typeMap = {
@@ -423,7 +426,7 @@ namespace glTFBastard {
 			{ 5126, Accessor::COMPONENT_TYPE_FLOAT }
 		};
 
-		std::shared_ptr<Accessor> result(new Accessor());
+		std::unique_ptr<Accessor> result(new Accessor());
 		if (!ParseRequiredElement(jsonElement["bufferView"], elementName + ".bufferView", &result->bufferView, outErr)) {
 			return false;
 		}
@@ -457,15 +460,15 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Mesh::Primitive element.
-	template<> bool ParseElement<std::shared_ptr<Mesh::Primitive>>(
+	template<> bool ParseElement<std::unique_ptr<Mesh::Primitive>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Mesh::Primitive>* out,
+		std::unique_ptr<Mesh::Primitive>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, Mesh::Primitive::Mode> modeMap = {
@@ -478,7 +481,7 @@ namespace glTFBastard {
 			{ 6, Mesh::Primitive::TYPE_TRIANGLE_FAN }
 		};
 
-		std::shared_ptr<Mesh::Primitive> result(new Mesh::Primitive());
+		std::unique_ptr<Mesh::Primitive> result(new Mesh::Primitive());
 		if (!ParseOptionalElement(jsonElement["attributes"], elementName + ".attributes", &result->attributes, outErr)) {
 			return false;
 		}
@@ -495,31 +498,31 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Mesh element.
-	template<> bool ParseElement<std::shared_ptr<Mesh>>(
+	template<> bool ParseElement<std::unique_ptr<Mesh>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Mesh>* out,
+		std::unique_ptr<Mesh>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Mesh> result(new Mesh());
+		std::unique_ptr<Mesh> result(new Mesh());
 		if (!ParseOptionalElement(jsonElement["primitives"], elementName + ".primitives", &result->primitives, outErr)) {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Shader element.
-	template<> bool ParseElement<std::shared_ptr<Shader>>(
+	template<> bool ParseElement<std::unique_ptr<Shader>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Shader>* out,
+		std::unique_ptr<Shader>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, Shader::Type> typeMap = {
@@ -527,7 +530,7 @@ namespace glTFBastard {
 			{ 35633, Shader::TYPE_VERTEX_SHADER }
 		};
 
-		std::shared_ptr<Shader> result(new Shader());
+		std::unique_ptr<Shader> result(new Shader());
 		if (!ParseRequiredElement(jsonElement["uri"], elementName + ".uri", &result->uri, outErr)) {
 			return false;
 		}
@@ -536,18 +539,18 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Program element.
-	template<> bool ParseElement<std::shared_ptr<Program>>(
+	template<> bool ParseElement<std::unique_ptr<Program>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Program>* out,
+		std::unique_ptr<Program>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Program> result(new Program());
+		std::unique_ptr<Program> result(new Program());
 		if (!ParseOptionalElement(jsonElement["attributes"], elementName + ".attributes", &result->attributes, outErr)) {
 			return false;
 		}
@@ -560,103 +563,103 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Parameter Value element.
-	template<> bool ParseElement<std::shared_ptr<ParameterValue>>(
+	template<> bool ParseElement<std::unique_ptr<ParameterValue>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<ParameterValue>* out,
+		std::unique_ptr<ParameterValue>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<ParameterValue> result(new ParameterValue());
+		std::unique_ptr<ParameterValue> result(new ParameterValue());
 		if (jsonElement.type == json_array) {
 			// Assume the type of array based on the first element.
 			json_type valueType = jsonElement.u.array.length ? jsonElement.u.array.values[0]->type : json_none;
 
 			switch (valueType) {
-			case json_integer:
-			case json_double: {
-				if (!ParseElement(jsonElement, elementName, &result->numberData, outErr)) {
+				case json_integer: 
+				case json_double: {
+					if (!ParseElement(jsonElement, elementName, &result->numberData, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_NUMBER_ARRAY;
+					break;
+				}
+				case json_string: {
+					if (!ParseElement(jsonElement, elementName, &result->stringData, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_STRING_ARRAY;
+					break;
+				}
+				case json_boolean: {
+					if (!ParseElement(jsonElement, elementName, &result->booleanData, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_BOOLEAN_ARRAY;
+					break;
+				}
+				default: {
+					outErr = "Could not parse parameter value element '" + elementName + "'. Unsupported array type.";
 					return false;
 				}
-
-				result->type = ParameterValue::TYPE_NUMBER_ARRAY;
-				break;
-			}
-			case json_string: {
-				if (!ParseElement(jsonElement, elementName, &result->stringData, outErr)) {
-					return false;
-				}
-
-				result->type = ParameterValue::TYPE_STRING_ARRAY;
-				break;
-			}
-			case json_boolean: {
-				if (!ParseElement(jsonElement, elementName, &result->booleanData, outErr)) {
-					return false;
-				}
-
-				result->type = ParameterValue::TYPE_BOOLEAN_ARRAY;
-				break;
-			}
-			default: {
-				outErr = "Could not parse parameter value element '" + elementName + "'. Unsupported array type.";
-				return false;
-			}
 			}
 		}
 		else {
 			switch (jsonElement.type) {
-			case json_integer:
-			case json_double: {
-				float numberValue;
-				if (!ParseElement(jsonElement, elementName, &numberValue, outErr)) {
+				case json_integer:
+				case json_double: {
+					float numberValue;
+					if (!ParseElement(jsonElement, elementName, &numberValue, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_NUMBER;
+					result->numberData.push_back(numberValue);
+					break;
+				}
+				case json_string: {
+					std::string stringValue;
+					if (!ParseElement(jsonElement, elementName, &stringValue, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_STRING;
+					result->stringData.push_back(stringValue);
+					break;
+				}
+				case json_boolean: {
+					bool booleanValue;
+					if (!ParseElement(jsonElement, elementName, &booleanValue, outErr)) {
+						return false;
+					}
+
+					result->type = ParameterValue::TYPE_BOOLEAN;
+					result->booleanData.push_back(booleanValue);
+					break;
+				}
+				default: {
+					outErr = "Could not parse parameter value element '" + elementName + "'. Unsupported type.";
 					return false;
 				}
-
-				result->type = ParameterValue::TYPE_NUMBER;
-				result->numberData.push_back(numberValue);
-				break;
-			}
-			case json_string: {
-				std::string stringValue;
-				if (!ParseElement(jsonElement, elementName, &stringValue, outErr)) {
-					return false;
-				}
-
-				result->type = ParameterValue::TYPE_STRING;
-				result->stringData.push_back(stringValue);
-				break;
-			}
-			case json_boolean: {
-				bool booleanValue;
-				if (!ParseElement(jsonElement, elementName, &booleanValue, outErr)) {
-					return false;
-				}
-
-				result->type = ParameterValue::TYPE_BOOLEAN;
-				result->booleanData.push_back(booleanValue);
-				break;
-			}
-			default: {
-				outErr = "Could not parse parameter value element '" + elementName + "'. Unsupported type.";
-				return false;
-			}
 			}
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Technique::Parameter element.
-	template<> bool ParseElement<std::shared_ptr<Technique::Parameter>>(
+	template<> bool ParseElement<std::unique_ptr<Technique::Parameter>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Technique::Parameter>* out,
+		std::unique_ptr<Technique::Parameter>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, Technique::Parameter::Type> typeMap = {
@@ -683,7 +686,7 @@ namespace glTFBastard {
 			{ 35678, Technique::Parameter::TYPE_SAMPLER_2D }
 		};
 
-		std::shared_ptr<Technique::Parameter> result(new Technique::Parameter());
+		std::unique_ptr<Technique::Parameter> result(new Technique::Parameter());
 		if (!ParseOptionalElement(jsonElement["node"], elementName + ".node", &result->node, outErr)) {
 			return false;
 		}
@@ -700,18 +703,18 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Technique element.
-	template<> bool ParseElement<std::shared_ptr<Technique>>(
+	template<> bool ParseElement<std::unique_ptr<Technique>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Technique>* out,
+		std::unique_ptr<Technique>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Technique> result(new Technique());
+		std::unique_ptr<Technique> result(new Technique());
 		if (!ParseOptionalElement(jsonElement["parameters"], elementName + ".parameters", &result->parameters, outErr)) {
 			return false;
 		}
@@ -729,15 +732,15 @@ namespace glTFBastard {
 		}
 
 		// TODO: States.
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Sampler element.
-	template<> bool ParseElement<std::shared_ptr<Sampler>>(
+	template<> bool ParseElement<std::unique_ptr<Sampler>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Sampler>* out,
+		std::unique_ptr<Sampler>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, Sampler::FilterType> magFilterTypeMap = {
@@ -760,7 +763,7 @@ namespace glTFBastard {
 			{ 10497, Sampler::WRAP_TYPE_REPEAT }
 		};
 
-		std::shared_ptr<Sampler> result(new Sampler());
+		std::unique_ptr<Sampler> result(new Sampler());
 		if (!ParseAndMapOptionalElement(jsonElement["magFilter"], elementName + ".magFilter", magFilterTypeMap, &result->magFilter, outErr)) {
 			return false;
 		}
@@ -777,18 +780,18 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Material element.
-	template<> bool ParseElement<std::shared_ptr<Material>>(
+	template<> bool ParseElement<std::unique_ptr<Material>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Material>* out,
+		std::unique_ptr<Material>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Material> result(new Material());
+		std::unique_ptr<Material> result(new Material());
 		if (!ParseOptionalElement(jsonElement["technique"], elementName + ".technique", &result->technique, outErr)) {
 			return false;
 		}
@@ -797,31 +800,31 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses an Image element.
-	template<> bool ParseElement<std::shared_ptr<Image>>(
+	template<> bool ParseElement<std::unique_ptr<Image>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Image>* out,
+		std::unique_ptr<Image>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Image> result(new Image());
+		std::unique_ptr<Image> result(new Image());
 		if (!ParseRequiredElement(jsonElement["uri"], elementName + ".uri", &result->uri, outErr)) {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Texture element.
-	template<> bool ParseElement<std::shared_ptr<Texture>>(
+	template<> bool ParseElement<std::unique_ptr<Texture>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Texture>* out,
+		std::unique_ptr<Texture>* out,
 		std::string& outErr) {
 
 		static const std::unordered_map<long long, Texture::Format> formatMap = {
@@ -839,7 +842,7 @@ namespace glTFBastard {
 			{ 32820, Texture::TYPE_UNSIGNED_SHORT_5_5_5_1 }
 		};
 
-		std::shared_ptr<Texture> result(new Texture());
+		std::unique_ptr<Texture> result(new Texture());
 		if (!ParseRequiredElement(jsonElement["sampler"], elementName + ".sampler", &result->sampler, outErr)) {
 			return false;
 		}
@@ -861,22 +864,22 @@ namespace glTFBastard {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Skin element.
-	template<> bool ParseElement<std::shared_ptr<Skin>>(
+	template<> bool ParseElement<std::unique_ptr<Skin>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Skin>* out,
+		std::unique_ptr<Skin>* out,
 		std::string& outErr) {
 
 		// Default value for the bindShapeMatrix;
-		static const float defaultBindShapeMatrix[]
+		static const float defaultBindShapeMatrix[] 
 			= { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
-		std::shared_ptr<Skin> result(new Skin());
+		std::unique_ptr<Skin> result(new Skin());
 
 		// Bind shape matrix.
 		auto bindShapeMatrixElement = jsonElement["bindShapeMatrix"];
@@ -899,29 +902,29 @@ namespace glTFBastard {
 			return false;
 		}
 
-		if (!ParseRequiredElement(jsonElement["jointNames"], elementName + ".jointNames", &result->joingNames, outErr)) {
+		if (!ParseRequiredElement(jsonElement["jointNames"], elementName + ".jointNames", &result->jointNames, outErr)) {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Node element.
-	template<> bool ParseElement<std::shared_ptr<Node>>(
+	template<> bool ParseElement<std::unique_ptr<Node>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Node>* out,
+		std::unique_ptr<Node>* out,
 		std::string& outErr) {
 
 		// Default values for the transform properties.
 		static const float defaultRotation[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		static const float defaultScale[] = { 1.0f, 1.0f, 1.0f };
 		static const float defaultTranslation[] = { 0.0f, 0.0f, 0.0f };
-		static const float defaultMatrix[]
+		static const float defaultMatrix[] 
 			= { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
-		std::shared_ptr<Node> result(new Node());
+		std::unique_ptr<Node> result(new Node());
 		if (!ParseOptionalElement(jsonElement["camera"], elementName + ".camera", &result->camera, outErr)) {
 			return false;
 		}
@@ -963,11 +966,11 @@ namespace glTFBastard {
 				memcpy(static_cast<void*>(&composite->rotation[0]), static_cast<const void*>(&defaultRotation[0]), sizeof(defaultRotation));
 			}
 			else if (!ParseFixedSizeArrayElement(
-				rotationElement,
-				elementName + ".rotation",
-				sizeof(composite->rotation) / sizeof(composite->rotation[0]),
-				&composite->rotation[0],
-				outErr)) {
+					rotationElement,
+					elementName + ".rotation",
+					sizeof(composite->rotation) / sizeof(composite->rotation[0]),
+					&composite->rotation[0],
+					outErr)) {
 				return false;
 			}
 
@@ -976,11 +979,11 @@ namespace glTFBastard {
 				memcpy(static_cast<void*>(&composite->scale[0]), static_cast<const void*>(&defaultScale[0]), sizeof(defaultScale));
 			}
 			else if (!ParseFixedSizeArrayElement(
-				scaleElement,
-				elementName + ".scale",
-				sizeof(composite->scale) / sizeof(composite->scale[0]),
-				&composite->scale[0],
-				outErr)) {
+					scaleElement,
+					elementName + ".scale",
+					sizeof(composite->scale) / sizeof(composite->scale[0]),
+					&composite->scale[0],
+					outErr)) {
 				return false;
 			}
 
@@ -989,11 +992,11 @@ namespace glTFBastard {
 				memcpy(static_cast<void*>(&composite->translation[0]), static_cast<const void*>(&defaultTranslation[0]), sizeof(defaultTranslation));
 			}
 			else if (!ParseFixedSizeArrayElement(
-				transElement,
-				elementName + ".translation",
-				sizeof(composite->translation) / sizeof(composite->translation[0]),
-				&composite->translation[0],
-				outErr)) {
+					transElement,
+					elementName + ".translation",
+					sizeof(composite->translation) / sizeof(composite->translation[0]),
+					&composite->translation[0],
+					outErr)) {
 				return false;
 			}
 		}
@@ -1015,29 +1018,28 @@ namespace glTFBastard {
 			}
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses a Scene element.
-	template<> bool ParseElement<std::shared_ptr<Scene>>(
+	template<> bool ParseElement<std::unique_ptr<Scene>>(
 		const json_value& jsonElement,
 		const std::string& elementName,
-		std::shared_ptr<Scene>* out,
+		std::unique_ptr<Scene>* out,
 		std::string& outErr) {
 
-		std::shared_ptr<Scene> result(new Scene());
+		std::unique_ptr<Scene> result(new Scene());
 		if (!ParseOptionalElement(jsonElement["nodes"], elementName + ".scenes", &result->nodes, outErr)) {
 			return false;
 		}
 
-		*out = result;
+		*out = std::move(result);
 		return true;
 	}
 
 	// Parses an entire glTF json document.
-	const std::shared_ptr<const glTF> Parse(const std::string& jsonString, std::string& outErr) {
-
+	std::unique_ptr<const glTF> Parse(const char* jsonString, size_t size, std::string& outErr) {
 		// Parse the json string.
 		json_value* rootElement;
 		{
@@ -1045,8 +1047,8 @@ namespace glTFBastard {
 			json_settings settings = { 0 };
 			rootElement = json_parse_ex(
 				&settings,
-				static_cast<const json_char*>(jsonString.c_str()),
-				jsonString.length(),
+				static_cast<const json_char*>(jsonString),
+				size,
 				parseError);
 
 			if (!rootElement) {
@@ -1055,7 +1057,7 @@ namespace glTFBastard {
 			}
 		}
 
-		std::shared_ptr<glTF> result(new glTF());
+		std::unique_ptr<glTF> result(new glTF());
 		if (!ParseOptionalElement((*rootElement)["cameras"], "glTF.cameras", &result->cameras, outErr)) {
 			return nullptr;
 		}
@@ -1121,7 +1123,6 @@ namespace glTFBastard {
 		}
 
 		// TODO: Animations.
-
-		return result;
+		return std::move(result);
 	}
 }

@@ -1,5 +1,4 @@
 # glTFBastard
-A C++ [glTF](https://github.com/KhronosGroup/glTF) document parser quickly put together. It simply takes in a string representing the json document and returns a document structure.
 * MIT licensed.
 * Requires C++11 and STL.
 * Uses [json-parser](https://github.com/udp/json-parser).
@@ -10,10 +9,10 @@ A C++ [glTF](https://github.com/KhronosGroup/glTF) document parser quickly put t
 
 ## Example
 ````c++
-std::string source = ReadEntireFile("/Duck/glTF/Duck.gltf")
+std::string source = ReadEntireFile("/Duck/glTF/Duck.gltf");
 
 std::string error;
-std::shared_ptr<const glTFBastard::glTF> doc = glTFBastard::Parse(source, error);
+std::unique_ptr<const glTFBastard::glTF> doc = glTFBastard::Parse(source.c_str(), source.size(), error);
 
 if (!doc) {
   PrintError("glTF load error: %s", error.c_str());
@@ -21,7 +20,7 @@ if (!doc) {
 }
 ````
 
-## Missing (TODO's)
+## Features still to be implemented.
 * Animation parsing.
 * Asset parsing.
 * Technique states.

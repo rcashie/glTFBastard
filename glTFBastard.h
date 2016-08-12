@@ -1,16 +1,16 @@
 /*
 Copyright (c) 2016 Ruben Cashie
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,
-modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation 
+files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, 
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
 is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES 
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR 
 IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
@@ -146,14 +146,14 @@ namespace glTFBastard {
 			std::string material;
 			Mode mode;
 
-			Primitive() :
+			Primitive():
 				mode(TYPE_TRIANGLES) {
 			}
 		};
 
-		std::vector<std::shared_ptr<Primitive>> primitives;
+		std::vector<std::unique_ptr<Primitive>> primitives;
 	};
-
+	
 	struct Shader {
 		enum Type {
 			TYPE_FRAGMENT_SHADER = 35632,
@@ -224,14 +224,14 @@ namespace glTFBastard {
 			Type type;
 			std::string semantic;
 			std::string node;
-			std::shared_ptr<ParameterValue> value;
+			std::unique_ptr<ParameterValue> value;
 
 			Parameter() :
 				type(TYPE_BYTE) {
 			}
 		};
 
-		std::unordered_map<std::string, std::shared_ptr<Parameter>> parameters;
+		std::unordered_map<std::string, std::unique_ptr<Parameter>> parameters;
 		std::unordered_map<std::string, std::string> attributes;
 		std::unordered_map<std::string, std::string> uniforms;
 		std::string program;
@@ -269,7 +269,7 @@ namespace glTFBastard {
 	};
 	struct Material {
 		std::string technique;
-		std::unordered_map<std::string, std::shared_ptr<ParameterValue>> values;
+		std::unordered_map<std::string, std::unique_ptr<ParameterValue>> values;
 	};
 
 	struct Image {
@@ -314,7 +314,7 @@ namespace glTFBastard {
 	struct Skin {
 		float bindShapeMatrix[16];
 		std::string inverseBindMatrices;
-		std::vector<std::string> joingNames;
+		std::vector<std::string> jointNames;
 	};
 
 	struct Node {
@@ -333,7 +333,7 @@ namespace glTFBastard {
 			Composite composite;
 			float matrix[16];
 		};
-
+		
 		std::string camera;
 		std::string skin;
 		std::vector<std::string> children;
@@ -354,25 +354,25 @@ namespace glTFBastard {
 	};
 
 	struct glTF {
-		std::unordered_map<std::string, std::shared_ptr<Camera>> cameras;
-		std::unordered_map<std::string, std::shared_ptr<Buffer>> buffers;
-		std::unordered_map<std::string, std::shared_ptr<BufferView>> bufferViews;
-		std::unordered_map<std::string, std::shared_ptr<Accessor>> accessors;
-		std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
-		std::unordered_map<std::string, std::shared_ptr<Shader>> shaders;
-		std::unordered_map<std::string, std::shared_ptr<Program>> programs;
-		std::unordered_map<std::string, std::shared_ptr<Material>> materials;
-		std::unordered_map<std::string, std::shared_ptr<Technique>> techniques;
-		std::unordered_map<std::string, std::shared_ptr<Sampler>> samplers;
-		std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
-		std::unordered_map<std::string, std::shared_ptr<Image>> images;
-		std::unordered_map<std::string, std::shared_ptr<Skin>> skins;
-		std::unordered_map<std::string, std::shared_ptr<Node>> nodes;
-		std::unordered_map<std::string, std::shared_ptr<Scene>> scenes;
+		std::unordered_map<std::string, std::unique_ptr<Camera>> cameras;
+		std::unordered_map<std::string, std::unique_ptr<Buffer>> buffers;
+		std::unordered_map<std::string, std::unique_ptr<BufferView>> bufferViews;
+		std::unordered_map<std::string, std::unique_ptr<Accessor>> accessors;
+		std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes;
+		std::unordered_map<std::string, std::unique_ptr<Shader>> shaders;
+		std::unordered_map<std::string, std::unique_ptr<Program>> programs;
+		std::unordered_map<std::string, std::unique_ptr<Material>> materials;
+		std::unordered_map<std::string, std::unique_ptr<Technique>> techniques;
+		std::unordered_map<std::string, std::unique_ptr<Sampler>> samplers;
+		std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
+		std::unordered_map<std::string, std::unique_ptr<Image>> images;
+		std::unordered_map<std::string, std::unique_ptr<Skin>> skins;
+		std::unordered_map<std::string, std::unique_ptr<Node>> nodes;
+		std::unordered_map<std::string, std::unique_ptr<Scene>> scenes;
 		std::string scene;
 	};
 
-	const std::shared_ptr<const glTF> Parse(const std::string& jsonString, std::string& outErr);
+	std::unique_ptr<const glTF> Parse(const char* jsonString, size_t size, std::string& outErr);
 }
 
 #endif
