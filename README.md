@@ -1,4 +1,6 @@
 # glTFBastard
+A simple C++ [glTF](https://github.com/KhronosGroup/glTF) document parser. It takes in a string representing the json document and returns a glTF document structure.
+
 * MIT licensed.
 * Requires C++11 and STL.
 * Uses [json-parser](https://github.com/udp/json-parser).
