@@ -311,6 +311,36 @@ namespace glTFBastard {
 		};
 	};
 
+	struct Animation {
+		struct Channel {
+			struct Target {
+				std::string id;
+				std::string path;
+			};
+
+			std::string sampler;
+			Target target;
+		};
+
+		struct Sampler {
+			enum Interpolation {
+				INTERPOLATION_LINEAR
+			};
+
+			Interpolation interpolation;
+			std::string input;
+			std::string output;
+
+			Sampler() :
+				interpolation(INTERPOLATION_LINEAR) {
+			}
+		};
+
+		std::vector<std::unique_ptr<Channel>> channels;
+		std::unordered_map<std::string, std::string> parameters;
+		std::unordered_map<std::string, std::unique_ptr<Sampler>> samplers;
+	};
+	
 	struct Skin {
 		float bindShapeMatrix[16];
 		std::string inverseBindMatrices;
@@ -366,6 +396,7 @@ namespace glTFBastard {
 		std::unordered_map<std::string, std::unique_ptr<Sampler>> samplers;
 		std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
 		std::unordered_map<std::string, std::unique_ptr<Image>> images;
+		std::unordered_map<std::string, std::unique_ptr<Animation>> animations;
 		std::unordered_map<std::string, std::unique_ptr<Skin>> skins;
 		std::unordered_map<std::string, std::unique_ptr<Node>> nodes;
 		std::unordered_map<std::string, std::unique_ptr<Scene>> scenes;

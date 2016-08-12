@@ -868,6 +868,81 @@ namespace glTFBastard {
 		return true;
 	}
 
+	// Parses an Animation::Sampler element.
+	template<> bool ParseElement<std::unique_ptr<Animation::Sampler>>(
+		const json_value& jsonElement,
+		const std::string& elementName,
+		std::unique_ptr<Animation::Sampler>* out,
+		std::string& outErr) {
+
+		std::unique_ptr<Animation::Sampler> result(new Animation::Sampler());
+		if (!ParseRequiredElement(jsonElement["input"], elementName + ".input", &result->input, outErr)) {
+			return false;
+		}
+
+		if (!ParseRequiredElement(jsonElement["output"], elementName + ".output", &result->output, outErr)) {
+			return false;
+		}
+
+		// NOTE: Not parsing interpolation here due to LINEAR being the only thing supported in glTF 1.0
+		*out = std::move(result);
+		return true;
+	}
+
+	// Parses an Animation::Channel element.
+	template<> bool ParseElement<std::unique_ptr<Animation::Channel>>(
+		const json_value& jsonElement,
+		const std::string& elementName,
+		std::unique_ptr<Animation::Channel>* out,
+		std::string& outErr) {
+
+		std::unique_ptr<Animation::Channel> result(new Animation::Channel());
+		if (!ParseRequiredElement(jsonElement["sampler"], elementName + ".sampler", &result->sampler, outErr)) {
+			return false;
+		}
+
+		auto targetElement = jsonElement["target"];
+		if (targetElement.type == json_none) {
+			outErr = "The required element '" + elementName + ".taget' does not exist.";
+			return false;
+		}
+
+		if (!ParseRequiredElement(targetElement["id"], elementName + ".target.id", &result->target.id, outErr)) {
+			return false;
+		}
+
+		if (!ParseRequiredElement(targetElement["path"], elementName + ".target.path", &result->target.path, outErr)) {
+			return false;
+		}
+
+		*out = std::move(result);
+		return true;
+	}
+
+	// Parses an Animation element.
+	template<> bool ParseElement<std::unique_ptr<Animation>>(
+		const json_value& jsonElement,
+		const std::string& elementName,
+		std::unique_ptr<Animation>* out,
+		std::string& outErr) {
+
+		std::unique_ptr<Animation> result(new Animation());
+		if (!ParseOptionalElement(jsonElement["parameters"], elementName + ".parameters", &result->parameters, outErr)) {
+			return false;
+		}
+
+		if (!ParseOptionalElement(jsonElement["channels"], elementName + ".channels", &result->channels, outErr)) {
+			return false;
+		}
+
+		if (!ParseOptionalElement(jsonElement["samplers"], elementName + ".samplers", &result->samplers, outErr)) {
+			return false;
+		}
+
+		*out = std::move(result);
+		return true;
+	}
+
 	// Parses a Skin element.
 	template<> bool ParseElement<std::unique_ptr<Skin>>(
 		const json_value& jsonElement,
@@ -1106,6 +1181,10 @@ namespace glTFBastard {
 			return nullptr;
 		}
 
+		if (!ParseOptionalElement((*rootElement)["animations"], "glTF.animations", &result->animations, outErr)) {
+			return nullptr;
+		}
+
 		if (!ParseOptionalElement((*rootElement)["skins"], "glTF.skins", &result->skins, outErr)) {
 			return nullptr;
 		}
@@ -1122,7 +1201,6 @@ namespace glTFBastard {
 			return nullptr;
 		}
 
-		// TODO: Animations.
 		return std::move(result);
 	}
 }
